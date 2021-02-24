@@ -1,0 +1,25 @@
+---
+kind: TanzuKubernetesCluster
+apiVersion: run.tanzu.vmware.com/v1alpha1
+metadata:
+  name: tanzu-cluster-41
+spec:
+  distribution:
+    version: v1.18.5
+  topology:
+    controlPlane:
+      count: 1
+      class: best-effort-xsmall
+      storageClass: vm-storage-policy-wcp
+    workers:
+      count: 1
+      class: best-effort-xsmall
+      storageClass: vm-storage-policy-wcp
+  settings:
+    network:
+      cni:
+        name: antrea #or calico
+      services:
+        cidrBlocks: ["10.21.0.0/16"]
+      pods:
+        cidrBlocks: ["10.22.0.0/16"]

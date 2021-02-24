@@ -1,0 +1,45 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: svc-web-a
+  labels:
+    app: web
+    site: web-a
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    site: web-a
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: web-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-httpd
+  template:
+    metadata:
+      labels:
+        app: demo-httpd
+        site: web-a
+    spec:
+      containers:
+      - name: httpd
+        image: gowatana/centos7:httpd
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        command:
+        - bash
+        - -c
+        - |
+          N=$(uname -n); echo '<h1>Demo Site <font color=red>A</font></h1><br>' $N > /var/www/html/index.html; httpd -D FOREGROUND
+

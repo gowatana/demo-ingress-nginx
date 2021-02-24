@@ -1,0 +1,5 @@
+bin
+vsphere-plugin.zip
+helm-*.tar.gz
+linux-amd64
+kubeconfig

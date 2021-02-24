@@ -1,0 +1,4 @@
+export PATH=$(pwd)/bin:$PATH
+export KUBECONFIG=$(pwd)/kubeconfig
+PS1='Tanzu$ '
+source <(kubectl completion bash)
