@@ -8,12 +8,13 @@ metadata:
     site: web-a
 spec:
   type: LoadBalancer
+  selector:
+    app: httpd
+    site: web-a
   ports:
   - port: 80
     protocol: TCP
     targetPort: 80
-  selector:
-    site: web-a
 
 ---
 kind: Deployment
@@ -24,11 +25,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo-httpd
+      app: httpd
+      site: web-a
   template:
     metadata:
       labels:
-        app: demo-httpd
+        app: httpd
         site: web-a
     spec:
       containers:
@@ -41,5 +43,9 @@ spec:
         - bash
         - -c
         - |
-          N=$(uname -n); echo '<h1>Demo Site <font color=red>A</font></h1><br>' $N > /var/www/html/index.html; httpd -D FOREGROUND
+          N=$(uname -n)
+          HTML=/var/www/html/index.html
+          echo '<h1>Demo Site <font color=red>A</font></h1>' > $HTML
+          echo 'Pod: ' $N >> $HTML
+          httpd -D FOREGROUND
 
