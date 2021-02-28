@@ -1,7 +1,15 @@
-# ingress demo
+# ingress-nginx demo
+
+vSphere with Tanzu の、Tanzu Kubernetes Cluster での Ingress デモ。
+
+## 0. スーパーバイザー名前空間の作成
+
+vSphere Client で、lab-ns-51 という名前で作成ずみ。
 
 
-Download kubectl
+## 1. Tanzu Kubernetes Cluster（TKC）作成
+
+スーパーバイザー 制御プレーンから、kubectl をダウンロード。
 
 ```
 $ SCP=192.168.25.128
@@ -9,21 +17,20 @@ $ curl -k -O https://$SCP/wcp/plugin/linux-amd64/vsphere-plugin.zip
 $ unzip ./vsphere-plugin.zip
 ```
 
-set env
+環境変数を読み込み。（PS1、PATH、KUBECONFIG など）
 
 ```
 $ . env_kubectl
 $ kubectl version --short --client
 ```
 
-create tkc
+vSphere with Tanzu のスーパーバイザ制御プレーンに接続。
 
 ```
 $ kubectl vsphere login --server=$SCP --insecure-skip-tls-verify
-$ kubectl --context lab-ns-51 apply -f 01_tkc/tanzu-cluster-51.yml
 ```
 
-login examples
+参考： kubectl vsphere login の例。
 
 ```
 Tanzu$ kubectl vsphere login --server=$SCP --insecure-skip-tls-verify
@@ -43,7 +50,13 @@ To change context, use `kubectl config use-context <workload name>`
 Tanzu$
 ```
 
-connect to tkc
+Tanzu Kubernetes Cluster（TKC）の作成。
+
+```
+$ kubectl --context lab-ns-51 apply -f 01_tkc/tanzu-cluster-51.yml
+```
+
+TKC への接続。
 
 ```
 $ sh ./01_tkc/login_tanzu-cluster-51.sh
@@ -51,7 +64,9 @@ $ kubectl config use-context tanzu-cluster-51
 $ kubectl get nodes
 ```
 
-helm install
+## 2. Ingress コントローラ（ingress-nginx）のインストール
+
+helm のインストール。
 
 ```
 $ curl -OL https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz
@@ -60,18 +75,23 @@ $ cp ./linux-amd64/helm ./bin/
 $ helm version --short
 ```
 
-ingress-nginx install
+helm での、ingress-nginx のインストール。
 
 ```
-$ kubectl create ns ingress-nginx
 $ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+$ kubectl create ns ingress-nginx
 $ helm install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx
+```
+
+確認。
+
+```
 $ kubectl -n ingress-nginx get all
 $ kubectl -n ingress-nginx get services
-$ kubectl -n ingress-nginx get ingress
 ```
 
-example:
+参考： helm install の例。
 
 ```
 Tanzu$ helm install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx
@@ -124,19 +144,38 @@ If TLS is enabled for the Ingress, a Secret containing the certificate and key m
 Tanzu$
 ```
 
-create deployment / service / ingress
+## 3. Ingress リソース作成のデモ
+
+Kubernetes リソースを作成する。deployment / service / ingress
+
+Namespace 作成（ns-web-01）
 
 ```
-$ kubectl create ns ns-web-01
-$ kubectl -n ns-web-01 apply -f 03_web/svc-web-a.yml
-$ kubectl -n ns-web-01 apply -f 03_web/svc-web-b.yml
-$ kubectl -n ns-web-01 get all
-$ kubectl -n ns-web-01 apply -f 03_web/ingress_web-example.yml
-$ kubectl -n ns-web-01 get ingress
-$ kubectl -n ns-web-01 get all
+$ NS=ns-web-01
+$ kubectl create ns $NS
 ```
 
-delete tkc
+deployment / service の作成。
+
+```
+$ kubectl -n $NS apply -f 03_web/svc-web-a.yml
+$ kubectl -n $NS apply -f 03_web/svc-web-b.yml
+$ kubectl -n $NS get all
+```
+
+ingress リソースの作成。
+
+```
+$ kubectl -n $NS apply -f 03_web/ingress_web-example.yml
+$ kubectl -n $NS get ingress
+$ kubectl -n $NS get all
+```
+
+curl / web ブラウザから確認する。パスは /a と /b 。
+
+## 4. TKC の削除。
+
+TKC を削除する。
 
 ```
 $ kubectl --context lab-ns-51 delete -f 01_tkc/tanzu-cluster-51.yml
