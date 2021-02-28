@@ -4,7 +4,7 @@
 Download kubectl
 
 ```
-$ SCP=192.168.21.128
+$ SCP=192.168.25.128
 $ curl -k -O https://$SCP/wcp/plugin/linux-amd64/vsphere-plugin.zip
 $ unzip ./vsphere-plugin.zip
 ```
@@ -19,16 +19,35 @@ $ kubectl version --short --client
 create tkc
 
 ```
-$ kubectl vsphere login --server=192.168.21.128 --insecure-skip-tls-verify
-$ kubectl config use-context lab-ns-41
-$ kubectl apply -f 01_tkc/tanzu-cluster-41.yml
+$ kubectl vsphere login --server=$SCP --insecure-skip-tls-verify
+$ kubectl --context lab-ns-51 apply -f 01_tkc/tanzu-cluster-51.yml
+```
+
+login examples
+
+```
+Tanzu$ kubectl vsphere login --server=$SCP --insecure-skip-tls-verify
+
+Username: administrator@vsphere.local
+Password:
+Logged in successfully.
+
+You have access to the following contexts:
+   192.168.25.128
+   lab-ns-51
+
+If the context you wish to use is not in this list, you may need to try
+logging in again later, or contact your cluster administrator.
+
+To change context, use `kubectl config use-context <workload name>`
+Tanzu$
 ```
 
 connect to tkc
 
 ```
-$ sh ./01_tkc/login_tanzu-cluster-41.sh
-$ kubectl config use-context tanzu-cluster-41
+$ sh ./01_tkc/login_tanzu-cluster-51.sh
+$ kubectl config use-context tanzu-cluster-51
 $ kubectl get nodes
 ```
 
@@ -117,5 +136,10 @@ $ kubectl -n ns-web-01 get ingress
 $ kubectl -n ns-web-01 get all
 ```
 
+delete tkc
+
+```
+$ kubectl --context lab-ns-51 delete -f 01_tkc/tanzu-cluster-51.yml
+```
 
 EOF
