@@ -64,6 +64,12 @@ $ kubectl config use-context tanzu-cluster-51
 $ kubectl get nodes
 ```
 
+PodSecurityPolicy を ClusterRoleBindings で割り当て。
+
+```
+$ kubectl apply 01_tkc/psp_ClusterRoleBindings.yml
+```
+
 ## 2. Ingress コントローラ（ingress-nginx）のインストール
 
 helm のインストール。
